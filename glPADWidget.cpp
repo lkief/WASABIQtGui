@@ -42,7 +42,7 @@
 #endif
 
 GLPADWidget::GLPADWidget(QWidget *parent, WASABIQtWindow* window)
-    : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
+    : QOpenGLWidget(parent)
 {
     xRot = 0;
     yRot = 0;
@@ -62,6 +62,62 @@ GLPADWidget::~GLPADWidget()
 {
 }
 
+
+/* for Qt6+
+ * from: https://stackoverflow.com/questions/28216001/how-to-render-text-with-qopenglwidget
+ */
+static void qt_save_gl_state()
+{
+    glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glMatrixMode(GL_TEXTURE);
+    glPushMatrix();
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+
+    glShadeModel(GL_FLAT);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_STENCIL_TEST);
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+}
+static void qt_restore_gl_state()
+{
+    glMatrixMode(GL_TEXTURE);
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glPopAttrib();
+    glPopClientAttrib();
+}
+void GLPADWidget::renderText(double x, double y, const QString text)
+{
+    GLdouble textPosX = x, textPosY = y;
+    // Retrieve last OpenGL color to use as a font color
+    GLdouble glColor[4];
+    glGetDoublev(GL_CURRENT_COLOR, glColor);
+    QColor fontColor = QColor(glColor[0]*255, glColor[1]*255,
+    glColor[2]*255, glColor[3]*255);
+    // Render text
+    QPainter painter(this);
+    //painter.translate(float(_shiftX),float(_shiftY)); //This is for my own mouse event (scaling)
+
+    painter.setPen(fontColor);
+    QFont f;
+    f.setPixelSize(10);
+    painter.setFont(f);
+    painter.drawText(textPosX, textPosY, text);
+    painter.end();
+}
+
+/* end for Qt6+ */
 QSize GLPADWidget::minimumSizeHint() const
 {
     return QSize(50, 50);
@@ -86,7 +142,7 @@ void GLPADWidget::setXRotation( int angle)
     if (angle != xRot)  {
         xRot = angle;
         emit xRotationChanged(angle);
-        updateGL();
+        //updateGL();
     }
 }
 
@@ -96,7 +152,7 @@ void GLPADWidget::setYRotation( int angle)
     if (angle != yRot)  {
         yRot = angle;
         emit yRotationChanged(angle);
-        updateGL();
+        //updateGL();
     }
 }
 
@@ -106,13 +162,13 @@ void GLPADWidget::setZRotation( int angle)
     if (angle != zRot)  {
         zRot = angle;
         emit zRotationChanged(angle);
-        updateGL();
+        //updateGL();
     }
 }
 
 void GLPADWidget::initializeGL()
 {
-    qglClearColor(qtPurple.dark());
+    //qglClearColor(qtPurple);
 
     /* remove back faces */
     glDisable(GL_CULL_FACE);
@@ -154,9 +210,9 @@ void GLPADWidget::paintGL()
     if (parentWindow && !parentWindow->showXYZ()) {
         glPushMatrix();
         glCallList( padSpace );
-        QGLWidget::renderText(120,0,0,"+A");
-        QGLWidget::renderText(0,120,0,"+P");
-        QGLWidget::renderText(0,0,120,"+D");
+        renderText(120,0,"+A");
+        renderText(0,120,"+P");
+        renderText(0,0,"+D");
         glPopMatrix();
     }
 
@@ -204,15 +260,15 @@ void GLPADWidget::paintGL()
 
                 glTranslatef(0, -10, 0);
                 glRotatef(180, 1.0f, 0.0f, 0.0f);
-                QGLWidget::renderText(0,0,0,ea->getName().c_str());
+                renderText(0,0,ea->getName().c_str());
 
                 glPopMatrix();
             }
 
             glPushMatrix();
-            QGLWidget::renderText(120,0,0,"X");
-            QGLWidget::renderText(0,120,0,"Y");
-            QGLWidget::renderText(0,0,120,"Z");
+            renderText(120,0,"X");
+            renderText(0,120,"Y");
+            renderText(0,0,"Z");
             glPopMatrix();
             glScalef((float) ea->EmoConPerson->xReg,
                      (float) ea->EmoConPerson->yReg, 1);
@@ -234,7 +290,7 @@ void GLPADWidget::paintGL()
             glColor3f(0.8, 0.8, 0.8);
             glCallList(padSphere);
             glTranslatef(0, -10, 0);
-            QGLWidget::renderText(0,0,0,ea->getName().c_str());
+            renderText(0,0,ea->getName().c_str());
             glPopMatrix();
         }
         glColor4fv(color);

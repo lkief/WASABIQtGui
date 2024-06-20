@@ -24,12 +24,12 @@
 ********************************************************************************/
 #ifndef GLPADWIDGET_H
 #define GLPADWIDGET_H
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include "WASABIEngine.h"
 
 class WASABIQtWindow;
 
-class GLPADWidget : public QGLWidget
+class GLPADWidget : public QOpenGLWidget
  {
     Q_OBJECT
 
@@ -56,6 +56,8 @@ protected:
     void resizeGL( int width,  int height);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
+    /* for Qt6+ */
+    void renderText(double x, double y, const QString text);
 
 private:
     int xRot;
