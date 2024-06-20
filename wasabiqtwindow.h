@@ -27,7 +27,7 @@
 #define CURRENT_VERSION "0.8.1"
 
 #include <QMainWindow>
-#include "WASABIEngine.h"
+#include "WASABIEngine/includes/WASABIEngine.h"
 #include <QWidget>
 #include <QStandardItemModel>
 #include <QTimer>

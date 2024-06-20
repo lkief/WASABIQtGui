@@ -25,7 +25,7 @@
 #ifndef GLPADWIDGET_H
 #define GLPADWIDGET_H
 #include <QOpenGLWidget>
-#include "WASABIEngine.h"
+#include "WASABIEngine/includes/WASABIEngine.h"
 
 class WASABIQtWindow;
 
