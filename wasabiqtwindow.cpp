@@ -893,8 +893,8 @@ bool WASABIQtWindow::parseMessage(QString message) {
                 }
             }
             else{
-                QString param3 = param2.append(".emo_dyn");
-                param2 = param2.append(".emo_pad");
+                QString param3 = param2 + ".emo_dyn";
+                param2 = param2 + ".emo_pad";
 
                 std::string dyn = param3.toStdString();
                 std::string pad = param2.toStdString();
